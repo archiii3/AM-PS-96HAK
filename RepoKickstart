@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""
+repokickstart.py
+A small CLI that generates a ready-to-push GitHub repository skeleton.
+Usage: python repokickstart.py MyProjectName --author "Your Name" --license MIT
+"""
+import os
+import argparse
+from datetime import datetime
+
+MIT_LICENSE = """MIT License
+
+Copyright (c) {year} {author}
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+GITIGNORE_PY = """
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtualenv
+venv/
+.env
+ENV/
+env/
+
+# Pytest
+.cache/
+
+# IDEs
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+"""
+
+README_TEMPLATE = """# {project}
+
+One-line description of the project.
+
+## Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Unix/macOS
+.venv\\Scripts\\activate   # Windows (PowerShell)
+pip install -r requirements.txt
+```
+
+## Usage
+
+Explain how to run or import your project.
+
+## License
+
+This project is licensed under the {license} License - see the LICENSE file for details.
+"""
+
+MAIN_PY = """"""# sample entry point for the project
+
+def main():
+    print("Hello from {project}!")
+
+if __name__ == '__main__':
+    main()
+"""
+
+CI_WORKFLOW = """name: Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Run tests
+      run: |
+        if [ -f pytest.ini ] || [ -d tests ]; then pytest -q; fi
+"""
+
+def make_folder(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        print(f"Created: {path}")
+
+
+def write_file(path, content):
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print(f"Wrote: {path}")
+
+
+def main_cli():
+    parser = argparse.ArgumentParser(description='Generate a GitHub repo skeleton')
+    parser.add_argument('project', help='Project folder/name to create')
+    parser.add_argument('--author', default='Your Name', help='Author/owner name')
+    parser.add_argument('--license', choices=['MIT', 'None'], default='MIT', help='License to add')
+    parser.add_argument('--force', action='store_true', help='Overwrite existing files')
+    args = parser.parse_args()
+
+    project = args.project
+    author = args.author
+    license_choice = args.license
+
+    if os.path.exists(project) and not args.force:
+        print(f"Error: '{project}' already exists. Use --force to overwrite files.")
+        return
+
+    make_folder(project)
+    # top-level files
+    write_file(os.path.join(project, 'README.md'), README_TEMPLATE.format(project=project, license=license_choice))
+    write_file(os.path.join(project, '.gitignore'), GITIGNORE_PY)
+    write_file(os.path.join(project, 'requirements.txt'), "# add your Python dependencies here\n")
+
+    # src package
+    src_dir = os.path.join(project, project.replace('-', '_'))
+    make_folder(src_dir)
+    write_file(os.path.join(src_dir, '__init__.py'), "# package init\n")
+    write_file(os.path.join(src_dir, 'main.py'), MAIN_PY.format(project=project))
+
+    # tests
+    tests_dir = os.path.join(project, 'tests')
+    make_folder(tests_dir)
+    write_file(os.path.join(tests_dir, 'test_sample.py'), 'def test_placeholder():\n    assert True\n')
+
+    # ci
+    ci_dir = os.path.join(project, '.github', 'workflows')
+    make_folder(ci_dir)
+    write_file(os.path.join(ci_dir, 'python-package.yml'), CI_WORKFLOW)
+
+    # license
+    if license_choice == 'MIT':
+        year = datetime.now().year
+        write_file(os.path.join(project, 'LICENSE'), MIT_LICENSE.format(year=year, author=author))
+
+    print('\nRepository skeleton created. Next steps:')
+    print(f'  cd {project}')
+    print('  git init')
+    print('  git add .')
+    print('  git commit -m "Initial commit"')
+    print('  git branch -M main')
+    print('  (create a GitHub repo and push)')
+
+if __name__ == '__main__':
+    main_cli()
