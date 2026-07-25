@@ -167,12 +167,7 @@ def main_cli():
     write_file(os.path.join(src_dir, '__init__.py'), "# package init\n")
     write_file(os.path.join(src_dir, 'main.py'), MAIN_PY.format(project=project))
 
-    # tests
-    tests_dir = os.path.join(project, 'tests')
-    make_folder(tests_dir)
-    write_file(os.path.join(tests_dir, 'test_sample.py'), 'def test_placeholder():\n    assert True\n')
-
-    # ci
+     # ci
     ci_dir = os.path.join(project, '.github', 'workflows')
     make_folder(ci_dir)
     write_file(os.path.join(ci_dir, 'python-package.yml'), CI_WORKFLOW)
