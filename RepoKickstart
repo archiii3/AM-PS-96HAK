@@ -166,24 +166,50 @@ def main_cli():
     make_folder(src_dir)
     write_file(os.path.join(src_dir, '__init__.py'), "# package init\n")
     write_file(os.path.join(src_dir, 'main.py'), MAIN_PY.format(project=project))
+# GhostVault
 
-     # ci
-    ci_dir = os.path.join(project, '.github', 'workflows')
-    make_folder(ci_dir)
-    write_file(os.path.join(ci_dir, 'python-package.yml'), CI_WORKFLOW)
+GhostVault is a lightweight, secure command-line application that helps users encrypt, decrypt, and organize sensitive files using strong AES-256 encryption.
 
-    # license
-    if license_choice == 'MIT':
-        year = datetime.now().year
-        write_file(os.path.join(project, 'LICENSE'), MIT_LICENSE.format(year=year, author=author))
+## Features
 
-    print('\nRepository skeleton created. Next steps:')
-    print(f'  cd {project}')
-    print('  git init')
-    print('  git add .')
-    print('  git commit -m "Initial commit"')
-    print('  git branch -M main')
-    print('  (create a GitHub repo and push)')
+- AES-256 file encryption
+- Password-based key generation
+- Secure file decryption
+- Folder protection
+- Automatic integrity verification
+- Cross-platform support
+- Fast and lightweight
 
-if __name__ == '__main__':
+## Installation
+
+```bash
+git clone https://github.com/yourusername/GhostVault.git
+cd GhostVault
+pip install -r requirements.txt
+```
+
+## Usage
+
+Encrypt a file:
+
+```bash
+python ghostvault.py encrypt secret.pdf
+```
+
+Decrypt a file:
+
+```bash
+python ghostvault.py decrypt secret.pdf.gv
+```
+
+## Technologies
+
+- Python 3.12
+- Cryptography
+- Argparse
+- Hashlib
+
+## License
+
+MIT License
     main_cli()
