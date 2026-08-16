@@ -12,11 +12,6 @@ MIT_LICENSE = """MIT License
 
 Copyright (c) {year} {author}
 
-GITIGNORE_PY = """
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
 
 # Distribution / packaging
 .Python
